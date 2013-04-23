@@ -22,8 +22,7 @@ bool LoadWordList(const tstring &wordFileName);
 bool LoadCubes(const tstring &cubeFileName);
 
 auto WordList = make_shared<vector<tstring>>(24000);
-//auto CubeList = make_shared<vector<shared_ptr<Cube<TCHAR>>>>(1000);
-vector<Cube<TCHAR>> CubeList(1000);
+auto CubeList = make_shared<vector<shared_ptr<Cube<TCHAR>>>>(1000);
 
 int _tmain(int argc, _TCHAR* argv[])
 {
@@ -104,9 +103,8 @@ bool LoadCubes(const tstring &cubeFileName)
 	while (cubeFile.good())
 	{
 		getline(cubeFile, currentLine);
-		//auto cube = make_shared<Cube<TCHAR>>(currentLine);
-		Cube<TCHAR> * cube = new Cube<TCHAR>(currentLine);
-		//CubeList.push_back(&cube);
+		auto cube = make_shared<Cube<TCHAR>>(currentLine);
+		CubeList->push_back(cube);
 	}
 	cubeFile.close();
 

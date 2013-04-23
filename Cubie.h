@@ -12,10 +12,10 @@ namespace Boggler
 	class Cubie
 	{
 		public:
-			Cubie<T>();
-			Cubie<T>(T val, int cubieNum);
-			void Cubie<T>::AddNeighbors(const shared_ptr<vector<shared_ptr<Cubie<T>>>> && neighbors);
-			const shared_ptr<vector<shared_ptr<Cubie<T>>>> && Cubie<T>::GetNeighbors() const;
+			Cubie();
+			Cubie(T val, int cubieNum);
+			//void AddNeighbors(const shared_ptr<vector<shared_ptr<Cubie<T>>>> neighbors);
+			//const shared_ptr<vector<shared_ptr<Cubie<T>>>> Cubie<T>::GetNeighbors() const;
 			const T & getValue() const;
 			void setValue(const T & value);
 			const int getCubieNumber() const;
