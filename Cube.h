@@ -1,12 +1,12 @@
 #pragma once
 
-#include "stdafx.h"
+//#include "stdafx.h"
 #include <string>
 #include <unordered_map>
 #include <vector>
 #include <memory>
 #include <array>
-#include "Cubie.h"
+//#include "Cubie.h"
 
 using namespace std;
 
@@ -19,13 +19,13 @@ namespace Boggler
 	{
 		public:
 			Cube<T>() { }
-			Cube<T>(tstring &rawData);
+			Cube<T>(tstring & rawData);
 			~Cube<T>() { }
 
 		private:
 			static const int Dimension = 4;
 			static const int PrefixLength = 2;
-			unique_ptr<array<shared_ptr<Cubie<T>>, Dimension * Dimension * Dimension>> _cubies();
-			unique_ptr<unordered_map<tstring, shared_ptr<vector<vector<shared_ptr<Cubie<T>>>>>>> _pathCache();
+			//unique_ptr<array<shared_ptr<Cubie<T>>, Dimension * Dimension * Dimension>> _cubies();
+			//unique_ptr<unordered_map<tstring, shared_ptr<vector<vector<shared_ptr<Cubie<T>>>>>>> _pathCache();
 	};
 }
