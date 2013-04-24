@@ -1,20 +1,20 @@
 #include "stdafx.h"
 #include "Cube.h"
 
+using namespace std;
+
 namespace Boggler
 {
 	// Must explicitly instantiate template so linker can find it.
 	template Cube<TCHAR>;
 
-	//template<typename T>
-	//Cube<T>::Cube()
-	//{}
-
 	template<typename T>
-	Cube<T>::Cube(tstring &rawData)
+	Cube<T>::Cube(tstring & rawData)
 	{
-		_cubies = unique_ptr<array<shared_ptr<Cubie<T>>, NumCubies>>(new array<shared_ptr<Cubie<T>>, NumCubies>);
+		_cubies = unique_ptr<vector<shared_ptr<Cubie<T>>>>(new vector<shared_ptr<Cubie<T>>>());
 		//_pathCache = unique_ptr<unordered_map<tstring, shared_ptr<vector<shared_ptr<Cubie<T>[]>>>>>;
+
+		PopulateCube(rawData);
 	}
 
 	template<typename T>
@@ -23,12 +23,10 @@ namespace Boggler
         //char characters[] = rawData
         for (int i = 0; i < NumCubies; i++)
         {
-            auto cubie = make_shared<Cubie<T>>(new Cubie<T>(rawData[i], i));
-            //_cubies[i] = cubie;
+            auto cubie = make_shared<Cubie<T>>(Cubie<T>(rawData.at(i), i));
+            _cubies->push_back(cubie);
+			//(_cubies*)[i] = cubie;
         }
     }
 
-	//template<typename T>
-	//Cube<T>::~Cube()
-	//{}
 }

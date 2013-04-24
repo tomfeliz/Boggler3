@@ -8,9 +8,7 @@
 #include <array>
 #include "Cubie.h"
 
-using namespace std;
-
-typedef basic_string<TCHAR> tstring;
+typedef std::basic_string<TCHAR> tstring;
 
 namespace Boggler
 {
@@ -26,8 +24,8 @@ namespace Boggler
 			static const int Dimension = 4;
 			static const int NumCubies = Dimension * Dimension * Dimension;
 			static const int PrefixLength = 2;
-			unique_ptr<array<shared_ptr<Cubie<T>>, NumCubies>> _cubies;
-			unique_ptr<unordered_map<tstring, shared_ptr<vector<vector<shared_ptr<Cubie<T>>>>>>> _pathCache;
+			std::unique_ptr<std::vector<std::shared_ptr<Cubie<T>>>> _cubies;
+			//std::unique_ptr<std::unordered_map<tstring, std::shared_ptr<std::vector<std::vector<std::shared_ptr<Cubie<T>>>>>>> _pathCache;
 			void Cube<T>::PopulateCube(tstring & rawData);
 	};
 }

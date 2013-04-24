@@ -1,12 +1,17 @@
 #include "stdafx.h"
 #include "Cubie.h"
 
+using namespace std;
+
 namespace Boggler
 {
+	// Must explicitly instantiate template so linker can find it.
+	template Cubie<TCHAR>;
+
 	template<typename T>
 	Cubie<T>::Cubie()
 	{
-		//_neighbors = make_shared(vector<shared_ptr<Cubie<T>>>());
+		_neighbors = make_shared<vector<shared_ptr<Cubie<T>>>>();
 	}
 
 	template<typename T>
