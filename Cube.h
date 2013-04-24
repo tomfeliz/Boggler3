@@ -19,13 +19,15 @@ namespace Boggler
 	{
 		public:
 			Cube() { }
-			Cube(tstring & rawData);
+			Cube(tstring &rawData);
 			~Cube() { }
 
 		private:
 			static const int Dimension = 4;
+			static const int NumCubies = Dimension * Dimension * Dimension;
 			static const int PrefixLength = 2;
-			unique_ptr<array<shared_ptr<Cubie<T>>, Dimension * Dimension * Dimension>> _cubies();
-			unique_ptr<unordered_map<tstring, shared_ptr<vector<vector<shared_ptr<Cubie<T>>>>>>> _pathCache();
+			unique_ptr<array<shared_ptr<Cubie<T>>, NumCubies>> _cubies;
+			unique_ptr<unordered_map<tstring, shared_ptr<vector<vector<shared_ptr<Cubie<T>>>>>>> _pathCache;
+			void Cube<T>::PopulateCube(tstring & rawData);
 	};
 }
