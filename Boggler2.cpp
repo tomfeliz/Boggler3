@@ -21,8 +21,8 @@ typedef basic_ifstream<TCHAR> tifstream;
 bool LoadWordList(const tstring &wordFileName);
 bool LoadCubes(const tstring &cubeFileName);
 
-auto WordList = make_shared<vector<tstring>>(24000);
-auto CubeList = make_shared<vector<shared_ptr<Cube<TCHAR>>>>(1000);
+auto WordList = make_shared<vector<tstring>>();
+auto CubeList = make_shared<vector<shared_ptr<Cube<TCHAR>>>>();
 
 int _tmain(int argc, _TCHAR* argv[])
 {
@@ -65,7 +65,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	clock_t start2 = clock();
 	LoadCubes(cubeFileName);
 	clock_t finish2 = clock();
-	cout << "LoadCubes: Loaded " << WordList->size() << " cubes in " 
+	cout << "LoadCubes: Loaded " << CubeList->size() << " cubes in " 
 		<< ((float)(finish2 - start2)) / CLOCKS_PER_SEC << " seconds." << endl;
 
 	string temp;
@@ -103,8 +103,11 @@ bool LoadCubes(const tstring &cubeFileName)
 	while (cubeFile.good())
 	{
 		getline(cubeFile, currentLine);
-		auto cube = make_shared<Cube<TCHAR>>(currentLine);
-		CubeList->push_back(cube);
+		if (currentLine.length() > 0)
+		{
+			auto cube = make_shared<Cube<TCHAR>>(currentLine);
+			CubeList->push_back(cube);
+		}
 	}
 	cubeFile.close();
 

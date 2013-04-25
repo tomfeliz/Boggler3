@@ -17,7 +17,7 @@ namespace Boggler
 	{
 		public:
 			Cube() { }
-			Cube(tstring &rawData);
+			Cube(const tstring &rawData);
 			~Cube() { }
 
 		private:
@@ -26,6 +26,6 @@ namespace Boggler
 			static const int PrefixLength = 2;
 			std::unique_ptr<std::vector<std::shared_ptr<Cubie<T>>>> _cubies;
 			//std::unique_ptr<std::unordered_map<tstring, std::shared_ptr<std::vector<std::vector<std::shared_ptr<Cubie<T>>>>>>> _pathCache;
-			void Cube<T>::PopulateCube(tstring & rawData);
+			void Cube<T>::PopulateCube(const tstring & rawData);
 	};
 }

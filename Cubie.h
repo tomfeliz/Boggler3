@@ -21,7 +21,7 @@ namespace Boggler
 			void setCubieNumber(const int value);
 
 		private:
-			std::shared_ptr<std::vector<std::shared_ptr<Cubie<T>>>> _neighbors;
+			std::unique_ptr<std::vector<std::shared_ptr<Cubie<T>>>> _neighbors;
 			T _value;
 			int _cubieNumber;
 	};

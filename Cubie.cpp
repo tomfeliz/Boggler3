@@ -11,7 +11,7 @@ namespace Boggler
 	template<typename T>
 	Cubie<T>::Cubie()
 	{
-		_neighbors = make_shared<vector<shared_ptr<Cubie<T>>>>();
+		_neighbors = unique_ptr<vector<shared_ptr<Cubie<T>>>>();
 	}
 
 	template<typename T>
