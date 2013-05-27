@@ -109,10 +109,10 @@ bool LoadCubes(const tstring &cubeFileName)
 	cubeFile.close();
 
 	// Calculate cube path cache.
-	//Parallel::ForEach(cubeList, [&] (void *cube)
-	//{
-	//	cube::PopulatePathCache();
-	//});
+	for(auto cube : *CubeList)
+	{
+		cube->PopulatePathCache();
+	}
 
 	return true;
 }

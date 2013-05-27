@@ -31,6 +31,6 @@ namespace Boggler
 			void Cube<T>::PopulateCube(const tstring & rawData);
 			void Cube<T>::PopulateNeighbors();
 			std::vector<std::shared_ptr<Cubie<T>>> Cube<T>::GetCubieNeighbors(int cubieNum);
-			void Cube<T>::AddPathCacheEntry(std::string &pattern, Cubie<T> &cubie);
+			void Cube<T>::AddPathCacheEntry(tstring &pattern, Cubie<T> &cubie);
 	};
 }
