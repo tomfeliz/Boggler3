@@ -78,5 +78,46 @@ namespace Boggler
         return cubieNeighbors;
     }
 
+	template<typename T>
+    void Cube<T>::PopulatePathCache()
+    {
+        for (int c = 0; c < Dimension * Dimension * Dimension; c++)
+        {
+            auto cubie = _cubies->at(c);
 
+            // Add 1-character prefixes
+            auto oneCharPattern = string(cubie->GetValue());
+            AddPathCacheEntry(string(oneCharPattern), cubie);
+
+			// Add 2-character prefixes
+            for (auto n1 : cubie->GetNeighbors())
+            {
+                string twoCharPattern = oneCharPattern + n1.GetValue();
+                AddPathCacheEntry(twoCharPattern, cubie, n1);
+            }
+        }
+    }
+
+    // Utility function to add new path cache entry.
+	template<typename T>
+    void Cube<T>::AddPathCacheEntry(string &pattern, Cubie<T> &cubie)
+    {
+        // Only add a path prefix if the prefix exists in the dictionary prefixes.
+        if (Program.DictPrefixes.Contains(pattern))
+        {
+            vector<Cubie<T>> cubieList;
+            if (_pathCache.TryGetValue(pattern, out cubieList))
+            {
+                if (!cubieList.Contains(cubie))
+                {
+                    cubieList.Add(cubie);
+                }
+            }
+            else
+            {
+                cubieList = new List<Cubie<T>> { cubie };
+                _pathCache.Add(pattern, cubieList);
+            }
+        }
+    }
 }

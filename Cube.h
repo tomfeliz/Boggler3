@@ -20,6 +20,7 @@ namespace Boggler
 			Cube() { }
 			Cube(const tstring &rawData);
 			~Cube() { }
+			void Cube<T>::PopulatePathCache();
 
 		private:
 			static const int Dimension = 4;
@@ -30,5 +31,6 @@ namespace Boggler
 			void Cube<T>::PopulateCube(const tstring & rawData);
 			void Cube<T>::PopulateNeighbors();
 			std::vector<std::shared_ptr<Cubie<T>>> Cube<T>::GetCubieNeighbors(int cubieNum);
+			void Cube<T>::AddPathCacheEntry(std::string &pattern, Cubie<T> &cubie);
 	};
 }
