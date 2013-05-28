@@ -12,8 +12,7 @@ namespace Boggler
 	Cube<T>::Cube(const tstring &rawData)
 	{
 		_cubies = unique_ptr<vector<shared_ptr<Cubie<T>>>>(new vector<shared_ptr<Cubie<T>>>());
-		_pathCache = unique_ptr<unordered_map<tstring, unique_ptr<vector<unique_ptr<vector<shared_ptr<Cubie<T>>>>>>>>(
-			new unordered_map<tstring, unique_ptr<vector<unique_ptr<vector<shared_ptr<Cubie<T>>>>>>>());
+		_pathCache = unique_ptr<unordered_map<tstring, vector<vector<shared_ptr<Cubie<T>>>>>>(new unordered_map<tstring, vector<vector<shared_ptr<Cubie<T>>>>>());
 
 		// First, populate the Cubie array from the raw data.
 		PopulateCube(rawData);
@@ -88,38 +87,46 @@ namespace Boggler
             // Add 1-character prefixes
             tstring oneCharPattern;
 			oneCharPattern += cubie->GetValue();
-            AddPathCacheEntry(oneCharPattern, *cubie);
+			vector<shared_ptr<Cubie<T>>> cubiePath;
+			cubiePath.push_back(cubie);
+            AddPathCacheEntry(oneCharPattern, cubiePath);
 
 			// Add 2-character prefixes
 			auto neighbors = cubie->GetNeighbors();
             for (auto n1 : *neighbors)
             {
                 tstring twoCharPattern = oneCharPattern + n1->GetValue();
-                //AddPathCacheEntry(twoCharPattern, cubie, n1);
+				vector<shared_ptr<Cubie<T>>> cubiePath;
+				cubiePath.push_back(cubie);
+				cubiePath.push_back(n1);
+                AddPathCacheEntry(twoCharPattern, cubiePath);
             }
         }
     }
 
     // Utility function to add new path cache entry.
 	template<typename T>
-    void Cube<T>::AddPathCacheEntry(tstring &pattern, Cubie<T> &cubie)
+    void Cube<T>::AddPathCacheEntry(tstring pattern, vector<shared_ptr<Cubie<T>>> cubiePath)
     {
-        // Only add a path prefix if the prefix exists in the dictionary prefixes.
-        //if (Program.DictPrefixes.Contains(pattern))
+		if (_pathCache->find(pattern) == _pathCache->end())
+		{
+			vector<vector<shared_ptr<Cubie<T>>>> paths;
+			paths.push_back(cubiePath);
+			_pathCache->emplace(pattern, paths);
+		}
+		else
+		{
+			// paths.Add(path);
+		}
+        //List<Cubie<Char>[]> paths;
+        //if (_pathCache.TryGetValue(pattern, out paths))
         //{
-        //    vector<Cubie<T>> cubieList;
-        //    if (_pathCache.TryGetValue(pattern, out cubieList))
-        //    {
-        //        if (!cubieList.Contains(cubie))
-        //        {
-        //            cubieList.Add(cubie);
-        //        }
-        //    }
-        //    else
-        //    {
-        //        cubieList = new List<Cubie<T>> { cubie };
-        //        _pathCache.Add(pattern, cubieList);
-        //    }
+        //    paths.Add(path);
+        //}
+        //else
+        //{
+        //    paths = new List<Cubie<char>[]>(3) { path };
+        //    _pathCache.Add(pattern, paths);
         //}
     }
 }
