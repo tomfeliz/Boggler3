@@ -2,11 +2,12 @@
 #pragma warning(disable:4503)
 
 //#include "stdafx.h"
+#include <array>
+#include <memory>
+#include <stack>
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <memory>
-#include <array>
 #include "Cubie.h"
 
 typedef std::basic_string<TCHAR> tstring;
@@ -18,8 +19,9 @@ namespace Boggler
 	{
 		public:
 			Cube() { }
-			Cube(const tstring &rawData);
+			Cube(const tstring rawData);
 			~Cube() { }
+			bool Cube<T>::FindWord(tstring word);
 			void Cube<T>::PopulatePathCache();
 
 		private:
@@ -28,6 +30,9 @@ namespace Boggler
 			static const int PrefixLength = 2;
 			std::unique_ptr<std::vector<std::shared_ptr<Cubie<T>>>> _cubies;
 			std::unique_ptr<std::unordered_map<tstring, std::vector<std::vector<std::shared_ptr<Cubie<T>>>>>> _pathCache;
+			bool Cube<T>::FindWordRecursive(std::vector<std::shared_ptr<Cubie<T>>> fromPath, std::vector<tstring> chunks, 
+				std::stack<std::shared_ptr<Cubie<T>>> pathStack);
+			static std::vector<tstring> Cube<T>::ChunkString(tstring str, int chunkSize);
 			void Cube<T>::PopulateCube(const tstring & rawData);
 			void Cube<T>::PopulateNeighbors();
 			std::vector<std::shared_ptr<Cubie<T>>> Cube<T>::GetCubieNeighbors(int cubieNum);
