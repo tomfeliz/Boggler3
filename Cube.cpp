@@ -73,7 +73,7 @@ namespace Boggler
         // Get the first chunk of the remaining string.
         tstring currChunk = chunks[0];
 
-        vector<vector<shared_ptr<Cubie<TCHAR>>>> paths;
+        vector<vector<shared_ptr<Cubie<T>>>> paths;
 		auto iter = _pathCache->find(currChunk);
         if (_pathCache.TryGetValue(currChunk, paths))
         {
