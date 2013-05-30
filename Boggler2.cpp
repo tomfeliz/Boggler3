@@ -1,11 +1,12 @@
 #include "stdafx.h"
-#include <string>
+#include <ctime>
+#include <fstream>
 #include <iostream>
 #include <memory>
 #include <regex>
-#include <fstream>
+#include <string>
 #include <vector>
-#include <ctime>
+
 #include "Cube.h"
 
 using namespace std;
@@ -18,8 +19,10 @@ typedef basic_ifstream<TCHAR> tifstream;
 bool LoadWordList(const tstring &wordFileName);
 bool LoadCubes(const tstring &cubeFileName);
 
-auto WordList = make_shared<vector<tstring>>();
-auto CubeList = make_shared<vector<shared_ptr<Cube<TCHAR>>>>();
+//auto WordList = make_shared<vector<tstring>>();
+//auto CubeList = make_shared<vector<shared_ptr<Cube<TCHAR>>>>();
+vector<tstring> WordList;
+vector<shared_ptr<Cube<TCHAR>>> CubeList;
 
 int _tmain(int argc, _TCHAR* argv[])
 {
@@ -55,15 +58,36 @@ int _tmain(int argc, _TCHAR* argv[])
 	clock_t start1 = clock();
 	LoadWordList(wordFileName);
 	clock_t finish1 = clock();
-	cout << "LoadWordList: Loaded " << WordList->size() << " words in " 
+	cout << "LoadWordList: Loaded " << WordList.size() << " words in " 
 		<< ((float)(finish1 - start1)) / CLOCKS_PER_SEC << " seconds." << endl;
 
 	// Load the cube file.
 	clock_t start2 = clock();
 	LoadCubes(cubeFileName);
 	clock_t finish2 = clock();
-	cout << "LoadCubes: Loaded " << CubeList->size() << " cubes in " 
+	cout << "LoadCubes: Loaded " << CubeList.size() << " cubes in " 
 		<< ((float)(finish2 - start2)) / CLOCKS_PER_SEC << " seconds." << endl;
+
+	for (unsigned int i = 0; i < CubeList.size(); i++)
+    {
+        clock_t start3 = clock();
+        int wordCount = 0;
+        auto cube = CubeList[i];
+
+        for (tstring word : WordList)
+        {
+            if (cube->FindWord(word))
+            {
+                wordCount++;
+            }
+        }
+		clock_t finish3 = clock();
+
+        cout << "Cube " << (i + 1) << ": " << wordCount << " words (" 
+			<< ((float)(finish2 - start2)) / CLOCKS_PER_SEC << " ms)" << endl;
+    }
+    //Console.WriteLine("Scored {0} cubes with dimension 4 in {1} seconds", cubeList.Count,
+    //    _swTotal.ElapsedMilliseconds / 1000.0);
 
 	string temp;
 	cout << "Press enter to terminate program..." << endl;
@@ -84,7 +108,7 @@ bool LoadWordList(const tstring &wordFileName)
 		// Skip empty lines and match on the alpha-numeric regex.
 		if (regex_match(currentLine, alphaRegex)) 
 		{
-			WordList->push_back(currentLine);
+			WordList.emplace_back(currentLine);
 		}
 	}
 	wordFile.close();
@@ -103,13 +127,13 @@ bool LoadCubes(const tstring &cubeFileName)
 		if (currentLine.length() > 0)
 		{
 			auto cube = make_shared<Cube<TCHAR>>(currentLine);
-			CubeList->push_back(cube);
+			CubeList.emplace_back(cube);
 		}
 	}
 	cubeFile.close();
 
 	// Calculate cube path cache.
-	for(auto cube : *CubeList)
+	for(auto cube : CubeList)
 	{
 		cube->PopulatePathCache();
 	}

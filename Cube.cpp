@@ -11,8 +11,8 @@ namespace Boggler
 	template<typename T>
 	Cube<T>::Cube(const tstring rawData)
 	{
-		_cubies = unique_ptr<vector<shared_ptr<Cubie<T>>>>(new vector<shared_ptr<Cubie<T>>>());
-		_pathCache = unique_ptr<unordered_map<tstring, vector<vector<shared_ptr<Cubie<T>>>>>>(new unordered_map<tstring, vector<vector<shared_ptr<Cubie<T>>>>>());
+		//_cubies = vector<shared_ptr<Cubie<T>>>(new vector<shared_ptr<Cubie<T>>>());
+		//_pathCache = unordered_map<tstring, vector<vector<shared_ptr<Cubie<T>>>>>(new unordered_map<tstring, vector<vector<shared_ptr<Cubie<T>>>>>());
 
 		// First, populate the Cubie array from the raw data.
 		PopulateCube(rawData);
@@ -30,7 +30,7 @@ namespace Boggler
         if (word.size() <= PrefixLength)
         {
             // For short words, just check the path cache.
-            found = (_pathCache->find(word) != _pathCache->end()) ? true : false;
+            found = (_pathCache.find(word) != _pathCache.end()) ? true : false;
         }
         else // word is greater than PrefixLength
         {
@@ -40,9 +40,11 @@ namespace Boggler
             // Get the first string chunk.
             tstring currChunk = chunks[0];
 
-            vector<vector<shared_ptr<Cubie<T>>>> paths;
-            if (_pathCache.TryGetValue(currChunk, paths))
+            //vector<vector<shared_ptr<Cubie<T>>>> paths;
+			
+            if (_pathCache.find(currChunk) != _pathCache.end())
             {
+				auto paths = _pathCache[currChunk];
                 chunks.erase(chunks.begin());
                 for (auto toPath : paths)
                 {
@@ -73,16 +75,16 @@ namespace Boggler
         // Get the first chunk of the remaining string.
         tstring currChunk = chunks[0];
 
-        vector<vector<shared_ptr<Cubie<T>>>> paths;
-		auto iter = _pathCache->find(currChunk);
-        if (_pathCache.TryGetValue(currChunk, paths))
-        {
+        //vector<vector<shared_ptr<Cubie<T>>>> paths;
+		if (_pathCache.find(currChunk) != _pathCache.end())
+		{
+			auto paths = _pathCache[currChunk];
             chunks.erase(chunks.begin());
             for (auto toPath : paths)
             {
                 // Make sure path is contiguous and does not overlap the path already traversed.
-                if (fromPath[PrefixLength - 1].Neighbors.Contains(toPath[0]) && !pathStack.Intersect(toPath).Any())
-                {
+                //if (fromPath[PrefixLength - 1].Neighbors.Contains(toPath[0]) && !pathStack.Intersect(toPath).Any())
+                //{
                     if (chunks.size() == 0)
                     {
                         // We're done... The word has been found.
@@ -99,7 +101,7 @@ namespace Boggler
                             break;
                         }
                     }
-                }
+                //}
             }
         }
 
@@ -128,7 +130,7 @@ namespace Boggler
         for (unsigned int i = 0; i < rawData.length(); i++)
         {
             auto cubie = make_shared<Cubie<T>>(rawData[i], i);
-            _cubies->push_back(cubie);
+            _cubies.emplace_back(cubie);
         }
     }
 
@@ -139,7 +141,7 @@ namespace Boggler
         for (int c = 0; c < Dimension * Dimension * Dimension; c++)
         {
             auto neighbors = GetCubieNeighbors(c);
-            _cubies->at(c)->SetNeighbors(neighbors);
+            _cubies[c]->SetNeighbors(neighbors);
         }
     }
 
@@ -164,9 +166,9 @@ namespace Boggler
                             if (x1 >= 0 && x1 < Dimension)
                             {
                                 int c1 = x1 + y1 * Dimension + z1 * Dimension * Dimension;
-                                if (_cubies->at(c1)->GetValue() != _cubies->at(cubieNum)->GetValue())
+                                if (_cubies[c1]->GetValue() != _cubies[cubieNum]->GetValue())
                                 {
-                                    cubieNeighbors.push_back(_cubies->at(c1));
+                                    cubieNeighbors.emplace_back(_cubies[c1]);
                                 }
                             }
                         }
@@ -183,7 +185,7 @@ namespace Boggler
     {
         for (int c = 0; c < Dimension * Dimension * Dimension; c++)
         {
-            auto cubie = _cubies->at(c);
+            auto cubie = _cubies[c];
 
             // Add 1-character prefixes
             tstring oneCharPattern;
@@ -209,16 +211,16 @@ namespace Boggler
 	template<typename T>
     void Cube<T>::AddPathCacheEntry(tstring pattern, vector<shared_ptr<Cubie<T>>> cubiePath)
     {
-		auto iter = _pathCache->find(pattern);
-		if (iter == _pathCache->end())
+		auto iter = _pathCache.find(pattern);
+		if (iter == _pathCache.end())
 		{
 			vector<vector<shared_ptr<Cubie<T>>>> paths;
-			paths.push_back(cubiePath);
-			_pathCache->emplace(pattern, paths);
+			paths.emplace_back(cubiePath);
+			_pathCache.emplace(pattern, paths);
 		}
 		else
 		{
-			iter->second.push_back(cubiePath);
+			iter->second.emplace_back(cubiePath);
 		}
     }
 

@@ -28,8 +28,10 @@ namespace Boggler
 			static const int Dimension = 4;
 			static const int NumCubies = Dimension * Dimension * Dimension;
 			static const int PrefixLength = 2;
-			std::unique_ptr<std::vector<std::shared_ptr<Cubie<T>>>> _cubies;
-			std::unique_ptr<std::unordered_map<tstring, std::vector<std::vector<std::shared_ptr<Cubie<T>>>>>> _pathCache;
+
+			std::vector<std::shared_ptr<Cubie<T>>> _cubies;
+			std::unordered_map<tstring, std::vector<std::vector<std::shared_ptr<Cubie<T>>>>> _pathCache;
+			
 			bool Cube<T>::FindWordRecursive(std::vector<std::shared_ptr<Cubie<T>>> fromPath, std::vector<tstring> chunks, 
 				std::stack<std::shared_ptr<Cubie<T>>> pathStack);
 			static std::vector<tstring> Cube<T>::ChunkString(tstring str, int chunkSize);
