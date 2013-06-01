@@ -56,4 +56,17 @@ namespace Boggler
 		_cubieNumber = value;
 	}
 
+	template<typename T>
+	bool Cubie<T>::operator==(const Cubie<T> &other) const 
+	{
+		  return (_cubieNumber ==  other.GetCubieNumber());
+	}
+
+	template<typename T>
+	bool Cubie<T>::operator!=(const Cubie<T> &other) const 
+	{
+		return !(*this == other);
+	}
+
+
 }

@@ -9,11 +9,8 @@ namespace Boggler
 	template Cube<TCHAR>;
 
 	template<typename T>
-	Cube<T>::Cube(const tstring rawData)
+	Cube<T>::Cube(const tstring &rawData)
 	{
-		//_cubies = vector<shared_ptr<Cubie<T>>>(new vector<shared_ptr<Cubie<T>>>());
-		//_pathCache = unordered_map<tstring, vector<vector<shared_ptr<Cubie<T>>>>>(new unordered_map<tstring, vector<vector<shared_ptr<Cubie<T>>>>>());
-
 		// First, populate the Cubie array from the raw data.
 		PopulateCube(rawData);
 
@@ -23,7 +20,7 @@ namespace Boggler
 
     // Searches for a word/pattern in the cube data utilizing adjacency relationships. This method must be thread-safe.
 	template<typename T>
-    bool Cube<T>::FindWord(tstring word)
+    bool Cube<T>::FindWord(const tstring &word)
     {
         bool found = false;
 
@@ -40,15 +37,13 @@ namespace Boggler
             // Get the first string chunk.
             tstring currChunk = chunks[0];
 
-            //vector<vector<shared_ptr<Cubie<T>>>> paths;
-			
             if (_pathCache.find(currChunk) != _pathCache.end())
             {
 				auto paths = _pathCache[currChunk];
                 chunks.erase(chunks.begin());
                 for (auto toPath : paths)
                 {
-					stack<shared_ptr<Cubie<T>>> s;
+					deque<shared_ptr<Cubie<T>>> s;
 					vector<tstring> c(chunks);
                     if (FindWordRecursive(toPath, c, s))
                     {
@@ -64,12 +59,12 @@ namespace Boggler
 
     // Main recursive depth-first search routine.
 	template<typename T>
-    bool Cube<T>::FindWordRecursive(vector<shared_ptr<Cubie<T>>> fromPath, vector<tstring> chunks, stack<shared_ptr<Cubie<T>>> pathStack)
+    bool Cube<T>::FindWordRecursive(const vector<shared_ptr<Cubie<T>>> &fromPath, vector<tstring> &chunks, deque<shared_ptr<Cubie<T>>> &pathStack)
     {
         bool found = false;
         for (auto cubie : fromPath)
         {
-            pathStack.push(cubie);
+            pathStack.push_front(cubie);
         }
 
         // Get the first chunk of the remaining string.
@@ -80,11 +75,28 @@ namespace Boggler
 		{
 			auto paths = _pathCache[currChunk];
             chunks.erase(chunks.begin());
-            for (auto toPath : paths)
+            for (const auto toPath : paths)
             {
+				// Make sure path does not overlap the path already traversed.
+				bool overlap = false;
+				for (auto c1 : pathStack)
+				{
+					for (const auto c2 : toPath)
+					{
+						if (c1 == c2)
+						{
+							overlap = true;
+							break;
+						}
+					}
+
+					if (overlap) break;
+				}
+
                 // Make sure path is contiguous and does not overlap the path already traversed.
-                //if (fromPath[PrefixLength - 1].Neighbors.Contains(toPath[0]) && !pathStack.Intersect(toPath).Any())
-                //{
+				auto neighbors = fromPath[PrefixLength - 1]->GetNeighbors();
+                if ((find(neighbors->begin(), neighbors->end(), toPath[0]) != neighbors->end()) && !overlap)
+				{
                     if (chunks.size() == 0)
                     {
                         // We're done... The word has been found.
@@ -101,20 +113,20 @@ namespace Boggler
                             break;
                         }
                     }
-                //}
+                }
             }
         }
 
         for (int i = 0; i < PrefixLength; i++)
         {
-            pathStack.pop();
+            pathStack.pop_front();
         }
         return found;
     }
 
     // Breaks a string up into regular size chunks.
 	template<typename T>
-    vector<tstring> Cube<T>::ChunkString(tstring str, int chunkSize)
+    vector<tstring> Cube<T>::ChunkString(const tstring &str, int chunkSize)
     {
         vector<tstring> chunks;
         for (unsigned int i = 0; i < str.size(); i += chunkSize)
@@ -166,7 +178,7 @@ namespace Boggler
                             if (x1 >= 0 && x1 < Dimension)
                             {
                                 int c1 = x1 + y1 * Dimension + z1 * Dimension * Dimension;
-                                if (_cubies[c1]->GetValue() != _cubies[cubieNum]->GetValue())
+                                if (_cubies[c1] != _cubies[cubieNum])
                                 {
                                     cubieNeighbors.emplace_back(_cubies[c1]);
                                 }
@@ -209,7 +221,7 @@ namespace Boggler
 
     // Utility function to add new path cache entry.
 	template<typename T>
-    void Cube<T>::AddPathCacheEntry(tstring pattern, vector<shared_ptr<Cubie<T>>> cubiePath)
+    void Cube<T>::AddPathCacheEntry(const tstring &pattern, vector<shared_ptr<Cubie<T>>> &cubiePath)
     {
 		auto iter = _pathCache.find(pattern);
 		if (iter == _pathCache.end())

@@ -84,10 +84,8 @@ int _tmain(int argc, _TCHAR* argv[])
 		clock_t finish3 = clock();
 
         cout << "Cube " << (i + 1) << ": " << wordCount << " words (" 
-			<< ((float)(finish2 - start2)) / CLOCKS_PER_SEC << " ms)" << endl;
+			<< ((float)(finish2 - start2)) / CLOCKS_PER_SEC << " seconds)" << endl;
     }
-    //Console.WriteLine("Scored {0} cubes with dimension 4 in {1} seconds", cubeList.Count,
-    //    _swTotal.ElapsedMilliseconds / 1000.0);
 
 	string temp;
 	cout << "Press enter to terminate program..." << endl;

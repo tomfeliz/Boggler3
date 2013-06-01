@@ -3,8 +3,8 @@
 
 //#include "stdafx.h"
 #include <array>
+#include <deque>
 #include <memory>
-#include <stack>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -19,9 +19,9 @@ namespace Boggler
 	{
 		public:
 			Cube() { }
-			Cube(const tstring rawData);
+			Cube(const tstring &rawData);
 			~Cube() { }
-			bool Cube<T>::FindWord(tstring word);
+			bool Cube<T>::FindWord(const tstring &word);
 			void Cube<T>::PopulatePathCache();
 
 		private:
@@ -32,12 +32,12 @@ namespace Boggler
 			std::vector<std::shared_ptr<Cubie<T>>> _cubies;
 			std::unordered_map<tstring, std::vector<std::vector<std::shared_ptr<Cubie<T>>>>> _pathCache;
 			
-			bool Cube<T>::FindWordRecursive(std::vector<std::shared_ptr<Cubie<T>>> fromPath, std::vector<tstring> chunks, 
-				std::stack<std::shared_ptr<Cubie<T>>> pathStack);
-			static std::vector<tstring> Cube<T>::ChunkString(tstring str, int chunkSize);
-			void Cube<T>::PopulateCube(const tstring & rawData);
+			bool Cube<T>::FindWordRecursive(const std::vector<std::shared_ptr<Cubie<T>>> &fromPath, std::vector<tstring> &chunks, 
+				std::deque<std::shared_ptr<Cubie<T>>> &pathStack);
+			static std::vector<tstring> Cube<T>::ChunkString(const tstring &str, int chunkSize);
+			void Cube<T>::PopulateCube(const tstring &rawData);
 			void Cube<T>::PopulateNeighbors();
 			std::vector<std::shared_ptr<Cubie<T>>> Cube<T>::GetCubieNeighbors(int cubieNum);
-			void Cube<T>::AddPathCacheEntry(tstring pattern, std::vector<std::shared_ptr<Cubie<T>>> cubiePath);
+			void Cube<T>::AddPathCacheEntry(const tstring &pattern, std::vector<std::shared_ptr<Cubie<T>>> &cubiePath);
 	};
 }

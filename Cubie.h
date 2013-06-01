@@ -19,6 +19,8 @@ namespace Boggler
 			void SetValue(const T &value);
 			const int GetCubieNumber() const;
 			void SetCubieNumber(const int value);
+			bool Cubie<T>::operator==(const Cubie<T> &other) const;
+			bool Cubie<T>::operator!=(const Cubie<T> &other) const;
 
 		private:
 			std::shared_ptr<std::vector<std::shared_ptr<Cubie<T>>>> _neighbors;
