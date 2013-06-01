@@ -27,7 +27,7 @@ namespace Boggler
         if (word.size() <= PrefixLength)
         {
             // For short words, just check the path cache.
-            found = (_pathCache.find(word) != _pathCache.end()) ? true : false;
+            found = (_pathCache.find(word) != _pathCache.end());
         }
         else // word is greater than PrefixLength
         {
@@ -79,7 +79,7 @@ namespace Boggler
             {
 				// Make sure path does not overlap the path already traversed.
 				bool overlap = false;
-				for (auto c1 : pathStack)
+				for (const auto c1 : pathStack)
 				{
 					for (const auto c2 : toPath)
 					{
@@ -126,12 +126,12 @@ namespace Boggler
 
     // Breaks a string up into regular size chunks.
 	template<typename T>
-    vector<tstring> Cube<T>::ChunkString(const tstring &str, int chunkSize)
+    inline vector<tstring> Cube<T>::ChunkString(const tstring &str, int chunkSize)
     {
         vector<tstring> chunks;
         for (unsigned int i = 0; i < str.size(); i += chunkSize)
         {
-            chunks.push_back(str.substr(i, min<int>(chunkSize, str.size() - i)));
+            chunks.emplace_back(str.substr(i, min<int>(chunkSize, str.size() - i)));
         }
         return chunks;
     }
