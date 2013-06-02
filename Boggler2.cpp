@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include <ctime>
 #include <fstream>
+#include <io.h>
 #include <iostream>
 #include <memory>
 #include <regex>
@@ -19,8 +20,6 @@ typedef basic_ifstream<TCHAR> tifstream;
 bool LoadWordList(const tstring &wordFileName);
 bool LoadCubes(const tstring &cubeFileName);
 
-//auto WordList = make_shared<vector<tstring>>();
-//auto CubeList = make_shared<vector<shared_ptr<Cube<TCHAR>>>>();
 vector<tstring> WordList;
 vector<shared_ptr<Cube<TCHAR>>> CubeList;
 
@@ -74,7 +73,7 @@ int _tmain(int argc, _TCHAR* argv[])
         int wordCount = 0;
         auto cube = CubeList[i];
 
-        for (tstring word : WordList)
+        for (const auto word : WordList)
         {
             if (cube->FindWord(word))
             {
