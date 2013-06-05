@@ -1,11 +1,13 @@
 #define _ITERATOR_DEBUG_LEVEL 0
 
 #include "stdafx.h"
+#include <atomic>
 #include <ctime>
 #include <fstream>
 #include <io.h>
 #include <iostream>
 #include <memory>
+#include <ppl.h>
 #include <regex>
 #include <set>
 #include <string>
@@ -23,13 +25,13 @@ typedef basic_ifstream<TCHAR> tifstream;
 bool LoadWordList(const tstring &wordFileName);
 bool LoadCubes(const tstring &cubeFileName);
 
-set<tstring> WordList;
+vector<tstring> WordList;
 vector<shared_ptr<Cube<TCHAR>>> CubeList;
 
 int _tmain(int argc, _TCHAR* argv[])
 {
 	// Preallocate cubes and words vectors.
-	//WordList.reserve(24000);
+	WordList.reserve(25000);
 	CubeList.reserve(1000);
 
 #pragma region Check command line arguments.
@@ -60,7 +62,10 @@ int _tmain(int argc, _TCHAR* argv[])
 	tstring cubeFileName = argv[1];
 	tstring wordFileName = argv[2];
 
-	//// Load the word file.
+	// Set global start clock
+	clock_t start0 = clock();
+
+	// Load the word file.
 	clock_t start1 = clock();
 	LoadWordList(wordFileName);
 	clock_t finish1 = clock();
@@ -77,21 +82,26 @@ int _tmain(int argc, _TCHAR* argv[])
 	for (unsigned int i = 0; i < CubeList.size(); i++)
     {
         clock_t start3 = clock();
-        int wordCount = 0;
-        auto cube = CubeList[i];
+        atomic<int> wordCount = 0;
+		auto cube = CubeList[i];
 
-        for (const auto word : WordList)
-        {
-            if (cube->FindWord(word))
+		concurrency::parallel_for_each(begin(WordList), end(WordList), [&](tstring word) 
+		{
+			if (cube->FindWord(word))
             {
                 wordCount++;
             }
-        }
+		});
+
 		clock_t finish3 = clock();
 
         cout << "Cube " << (i + 1) << ": " << wordCount << " words (" 
-			<< ((float)(finish2 - start2)) / CLOCKS_PER_SEC << " seconds)" << endl;
+			<< ((float)(finish3 - start3) * 1000) / CLOCKS_PER_SEC << " ms)" << endl;
     }
+
+	clock_t finish0 = clock();
+
+    cout << "Total execution time: " << ((float)(finish0 - start0)) / CLOCKS_PER_SEC << " seconds" << endl;
 
 	string temp;
 	cout << "Press enter to terminate program..." << endl;
@@ -112,8 +122,7 @@ bool LoadWordList(const tstring &wordFileName)
 		// Skip empty lines and match on the alpha-numeric regex.
 		if (regex_match(currentLine, alphaRegex)) 
 		{
-			//WordList.emplace_back(currentLine);
-			WordList.emplace(currentLine);
+			WordList.emplace_back(currentLine);
 		}
 	}
 	wordFile.close();
