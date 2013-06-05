@@ -1,3 +1,5 @@
+#define _ITERATOR_DEBUG_LEVEL 0
+
 #include "stdafx.h"
 #include <ctime>
 #include <fstream>
@@ -5,6 +7,7 @@
 #include <iostream>
 #include <memory>
 #include <regex>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -20,11 +23,15 @@ typedef basic_ifstream<TCHAR> tifstream;
 bool LoadWordList(const tstring &wordFileName);
 bool LoadCubes(const tstring &cubeFileName);
 
-vector<tstring> WordList;
+set<tstring> WordList;
 vector<shared_ptr<Cube<TCHAR>>> CubeList;
 
 int _tmain(int argc, _TCHAR* argv[])
 {
+	// Preallocate cubes and words vectors.
+	//WordList.reserve(24000);
+	CubeList.reserve(1000);
+
 #pragma region Check command line arguments.
 
 	auto abort = false;
@@ -105,7 +112,8 @@ bool LoadWordList(const tstring &wordFileName)
 		// Skip empty lines and match on the alpha-numeric regex.
 		if (regex_match(currentLine, alphaRegex)) 
 		{
-			WordList.emplace_back(currentLine);
+			//WordList.emplace_back(currentLine);
+			WordList.emplace(currentLine);
 		}
 	}
 	wordFile.close();

@@ -11,12 +11,16 @@ namespace Boggler
 	template<typename T>
 	Cube<T>::Cube(const tstring &rawData)
 	{
+		_cubies.reserve(NumCubies);
+
 		// First, populate the Cubie array from the raw data.
 		PopulateCube(rawData);
 
         // Second, find adjacent Cubies and populate path cache.
         PopulateNeighbors();
 	}
+
+#pragma region FindWord
 
     // Searches for a word/pattern in the cube data utilizing adjacency relationships. This method must be thread-safe.
 	template<typename T>
@@ -32,21 +36,25 @@ namespace Boggler
         else // word is greater than PrefixLength
         {
             // Split the word into chunks.
-            vector<tstring> chunks = ChunkString(word, PrefixLength);
+            //vector<tstring> chunks = ChunkString(word, PrefixLength);
 
             // Get the first string chunk.
-            tstring currChunk = chunks[0];
+            //tstring currChunk = chunks[0];
+			auto currChunk = word.substr(0, PrefixLength);
 
             if (_pathCache.find(currChunk) != _pathCache.end())
             {
 				auto paths = _pathCache[currChunk];
-                chunks.erase(chunks.begin());
-                for (auto toPath : paths)
+                
+				//chunks.erase(chunks.begin());
+                
+				for (auto toPath : paths)
                 {
-					//deque<shared_ptr<Cubie<T>>> s;
-					deque<Cubie<T>*> s;
-					vector<tstring> c(chunks);
-                    if (FindWordRecursive(toPath, c, s))
+					deque<shared_ptr<Cubie<T>>> s;
+					//deque<Cubie<T>*> s;
+					//vector<tstring> c(chunks);
+                    //if (FindWordRecursive(toPath, c, s))
+					if (FindWordRecursive(toPath, word.substr(PrefixLength, word.size() - PrefixLength), s))
                     {
                         found = true;
                         break;
@@ -60,8 +68,9 @@ namespace Boggler
 
     // Main recursive depth-first search routine.
 	template<typename T>
+	bool Cube<T>::FindWordRecursive(const vector<shared_ptr<Cubie<T>>> &fromPath, tstring subWord, deque<shared_ptr<Cubie<T>>> &pathStack)
     //bool Cube<T>::FindWordRecursive(const vector<shared_ptr<Cubie<T>>> &fromPath, vector<tstring> &chunks, deque<shared_ptr<Cubie<T>>> &pathStack)
-	bool Cube<T>::FindWordRecursive(const std::vector<Cubie<T>*> &fromPath, std::vector<tstring> &chunks, std::deque<Cubie<T>*> &pathStack)
+	//bool Cube<T>::FindWordRecursive(const std::vector<Cubie<T>*> &fromPath, std::vector<tstring> &chunks, std::deque<Cubie<T>*> &pathStack)
     {
         bool found = false;
         for (auto cubie : fromPath)
@@ -70,12 +79,13 @@ namespace Boggler
         }
 
         // Get the first chunk of the remaining string.
-        tstring currChunk = chunks[0];
+        //tstring currChunk = chunks[0];
+		auto currChunk = subWord.substr(0, min<int>(PrefixLength, subWord.size()));
 
 		auto pathIter = _pathCache.find(currChunk);
 		if (pathIter != _pathCache.end())
 		{
-            chunks.erase(chunks.begin());
+            //chunks.erase(chunks.begin());
 
 			for (const auto toPath : pathIter->second)
             {
@@ -97,10 +107,11 @@ namespace Boggler
 
                 // Make sure path is contiguous and does not overlap the path already traversed.
 				auto neighbors = fromPath[PrefixLength - 1]->GetNeighbors();
-                //if (!overlap && (find(neighbors->begin(), neighbors->end(), toPath[0]) != neighbors->end()))
-				if (!overlap && (find(neighbors.begin(), neighbors.end(), toPath[0]) != neighbors.end()))
+                if (!overlap && (find(neighbors->begin(), neighbors->end(), toPath[0]) != neighbors->end()))
+				//if (!overlap && (find(neighbors.begin(), neighbors.end(), toPath[0]) != neighbors.end()))
 				{
-                    if (chunks.size() == 0)
+                    //if (subWord.size() == 0)
+					if (subWord.size() <= PrefixLength)
                     {
                         // We're done... The word has been found.
                         found = true;
@@ -109,8 +120,9 @@ namespace Boggler
                     else
                     {
                         // Recurse further...
-						vector<tstring> c(chunks);
-                        if (FindWordRecursive(toPath, c, pathStack))
+						//vector<tstring> c(chunks);
+                        //if (FindWordRecursive(toPath, c, pathStack))
+						if (FindWordRecursive(toPath, subWord.substr(PrefixLength, subWord.size() - PrefixLength), pathStack))
                         {
                             found = true;
                             break;
@@ -139,6 +151,29 @@ namespace Boggler
         return chunks;
     }
 
+#pragma endregion
+
+#pragma region CountWords
+
+	template<typename T>
+	int Cube<T>::CountWords(vector<tstring> &wordList)
+	{
+		int count = 0;
+		for (auto cubie : _cubies)
+		{
+			
+		}
+		return count;
+	}
+
+	template<typename T>
+	bool Cube<T>::FindPrefix(tstring & prefix)
+	{
+		return false;
+	}
+
+#pragma endregion
+
 	template<typename T>
 	void Cube<T>::PopulateCube(const tstring &rawData)
     {
@@ -162,11 +197,11 @@ namespace Boggler
     }
 
 	template<typename T>
-	//vector<shared_ptr<Cubie<T>>> Cube<T>::GetCubieNeighbors(int cubieNum)
-	std::vector<Cubie<T>*> Cube<T>::GetCubieNeighbors(int cubieNum)
+	vector<shared_ptr<Cubie<T>>> Cube<T>::GetCubieNeighbors(int cubieNum)
+	//std::vector<Cubie<T>*> Cube<T>::GetCubieNeighbors(int cubieNum)
     {
-		//vector<shared_ptr<Cubie<T>>> cubieNeighbors;
-		vector<Cubie<T>*> cubieNeighbors;
+		vector<shared_ptr<Cubie<T>>> cubieNeighbors;
+		//vector<Cubie<T>*> cubieNeighbors;
         int z = cubieNum / (Dimension * Dimension);
         int y = (cubieNum - z * Dimension * Dimension) / Dimension;
         int x = (cubieNum - z * Dimension * Dimension - y * Dimension);
@@ -208,19 +243,19 @@ namespace Boggler
             // Add 1-character prefixes
             tstring oneCharPattern;
 			oneCharPattern += cubie->GetValue();
-			//vector<shared_ptr<Cubie<T>>> cubiePath;
-			vector<Cubie<T>*> cubiePath;
+			vector<shared_ptr<Cubie<T>>> cubiePath;
+			//vector<Cubie<T>*> cubiePath;
 			cubiePath.push_back(cubie);
             AddPathCacheEntry(oneCharPattern, cubiePath);
 
 			// Add 2-character prefixes
 			auto neighbors = cubie->GetNeighbors();
-            //for (auto n1 : *neighbors)
-			for (auto n1 : neighbors)
+            for (auto n1 : *neighbors)
+			//for (auto n1 : neighbors)
             {
                 tstring twoCharPattern = oneCharPattern + n1->GetValue();
-				//vector<shared_ptr<Cubie<T>>> cubiePath;
-				vector<Cubie<T>*> cubiePath;
+				vector<shared_ptr<Cubie<T>>> cubiePath;
+				//vector<Cubie<T>*> cubiePath;
 				cubiePath.push_back(cubie);
 				cubiePath.push_back(n1);
                 AddPathCacheEntry(twoCharPattern, cubiePath);
@@ -230,14 +265,14 @@ namespace Boggler
 
     // Utility function to add new path cache entry.
 	template<typename T>
-    //void Cube<T>::AddPathCacheEntry(const tstring &pattern, vector<shared_ptr<Cubie<T>>> &cubiePath)
-	void Cube<T>::AddPathCacheEntry(const tstring &pattern, std::vector<Cubie<T>*> &cubiePath)
+    void Cube<T>::AddPathCacheEntry(const tstring &pattern, vector<shared_ptr<Cubie<T>>> &cubiePath)
+	//void Cube<T>::AddPathCacheEntry(const tstring &pattern, std::vector<Cubie<T>*> &cubiePath)
     {
 		auto iter = _pathCache.find(pattern);
 		if (iter == _pathCache.end())
 		{
-			//vector<vector<shared_ptr<Cubie<T>>>> paths;
-			vector<vector<Cubie<T>*>> paths;
+			vector<vector<shared_ptr<Cubie<T>>>> paths;
+			//vector<vector<Cubie<T>*>> paths;
 			paths.emplace_back(cubiePath);
 			_pathCache.emplace(pattern, paths);
 		}

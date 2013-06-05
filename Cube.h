@@ -4,9 +4,9 @@
 //#include "stdafx.h"
 #include <array>
 #include <deque>
+#include <map>
 #include <memory>
 #include <string>
-#include <unordered_map>
 #include <vector>
 #include "Cubie.h"
 
@@ -29,21 +29,25 @@ namespace Boggler
 			static const int NumCubies = Dimension * Dimension * Dimension;
 			static const int PrefixLength = 2;
 
-			//std::vector<std::shared_ptr<Cubie<T>>> _cubies;
-			std::vector<Cubie<T>*> _cubies;
-			//std::unordered_map<tstring, std::vector<std::vector<std::shared_ptr<Cubie<T>>>>> _pathCache;
-			std::unordered_map<tstring, std::vector<std::vector<Cubie<T>*>>> _pathCache;
+			std::vector<std::shared_ptr<Cubie<T>>> _cubies;
+			//std::vector<Cubie<T>*> _cubies;
+			std::map<tstring, std::vector<std::vector<std::shared_ptr<Cubie<T>>>>> _pathCache;
+			//std::map<tstring, std::vector<std::vector<Cubie<T>*>>> _pathCache;
 			
-			/*bool Cube<T>::FindWordRecursive(const std::vector<std::shared_ptr<Cubie<T>>> &fromPath, std::vector<tstring> &chunks, 
-				std::deque<std::shared_ptr<Cubie<T>>> &pathStack);*/
-			bool Cube<T>::FindWordRecursive(const std::vector<Cubie<T>*> &fromPath, std::vector<tstring> &chunks, 
-				std::deque<Cubie<T>*> &pathStack);
-			static std::vector<tstring> Cube<T>::ChunkString(const tstring &str, int chunkSize);
+			bool Cube<T>::FindWordRecursive(const std::vector<std::shared_ptr<Cubie<T>>> &fromPath, tstring chunks, 
+				std::deque<std::shared_ptr<Cubie<T>>> &pathStack);
+			//bool Cube<T>::FindWordRecursive(const std::vector<std::shared_ptr<Cubie<T>>> &fromPath, std::vector<tstring> &chunks, 
+			//	std::deque<std::shared_ptr<Cubie<T>>> &pathStack);
+			//bool Cube<T>::FindWordRecursive(const std::vector<Cubie<T>*> &fromPath, std::vector<tstring> &chunks, 
+			//	std::deque<Cubie<T>*> &pathStack);
+			inline static std::vector<tstring> Cube<T>::ChunkString(const tstring &str, int chunkSize);
+			int Cube<T>::CountWords(std::vector<tstring> &wordList);
 			void Cube<T>::PopulateCube(const tstring &rawData);
+			bool Cube<T>::FindPrefix(tstring & prefix);
 			void Cube<T>::PopulateNeighbors();
-			//std::vector<std::shared_ptr<Cubie<T>>> Cube<T>::GetCubieNeighbors(int cubieNum);
-			std::vector<Cubie<T>*> Cube<T>::GetCubieNeighbors(int cubieNum);
-			//void Cube<T>::AddPathCacheEntry(const tstring &pattern, std::vector<std::shared_ptr<Cubie<T>>> &cubiePath);
-			void Cube<T>::AddPathCacheEntry(const tstring &pattern, std::vector<Cubie<T>*> &cubiePath);
+			std::vector<std::shared_ptr<Cubie<T>>> Cube<T>::GetCubieNeighbors(int cubieNum);
+			//std::vector<Cubie<T>*> Cube<T>::GetCubieNeighbors(int cubieNum);
+			void Cube<T>::AddPathCacheEntry(const tstring &pattern, std::vector<std::shared_ptr<Cubie<T>>> &cubiePath);
+			//void Cube<T>::AddPathCacheEntry(const tstring &pattern, std::vector<Cubie<T>*> &cubiePath);
 	};
 }
