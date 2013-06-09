@@ -147,10 +147,10 @@ bool LoadCubes(const tstring &cubeFileName)
 	cubeFile.close();
 
 	// Calculate cube path cache.
-	for(auto cube : CubeList)
+	concurrency::parallel_for_each(begin(CubeList), end(CubeList), [](shared_ptr<Cube<TCHAR>> cube)
 	{
 		cube->PopulatePathCache();
-	}
+	});
 
 	return true;
 }

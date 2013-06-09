@@ -44,8 +44,6 @@ namespace Boggler
 			{        
 				for (auto toPath : pathIter->second)
 				{
-					//deque<shared_ptr<Cubie<T>>> s;
-					//deque<Cubie<T>*> s;
 					vector<bool> cubieMap(NumCubies, false);
 					if (FindWordRecursive(toPath, word.substr(PrefixLength, wordLen - PrefixLength), cubieMap))
                     {
