@@ -39,9 +39,9 @@ namespace Boggler
 			//	std::deque<std::shared_ptr<Cubie<T>>> &pathStack);
 			//bool Cube<T>::FindWordRecursive(const std::vector<Cubie<T>*> &fromPath, tstring subWord, std::deque<Cubie<T>*> &pathStack);
 			bool Cube<T>::FindWordRecursive(const std::vector<Cubie<T>*> &fromPath, tstring subWord, std::vector<bool> &cubieMap);
-			int Cube<T>::CountWords(std::vector<tstring> &wordList);
+			//int Cube<T>::CountWords(const std::vector<tstring> &wordList);
 			void Cube<T>::PopulateCube(const tstring &rawData);
-			bool Cube<T>::FindPrefix(tstring & prefix);
+			//bool Cube<T>::FindPrefix(tstring & prefix);
 			void Cube<T>::PopulateNeighbors();
 			//std::vector<std::shared_ptr<Cubie<T>>> Cube<T>::GetCubieNeighbors(int cubieNum);
 			std::vector<Cubie<T>*> Cube<T>::GetCubieNeighbors(int cubieNum);

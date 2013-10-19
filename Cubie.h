@@ -14,9 +14,9 @@ namespace Boggler
 			Cubie(T val, int cubieNum);
 			~Cubie() {}
 			//void SetNeighbors(std::vector<std::shared_ptr<Cubie<T>>> &neighbors);
-			void SetNeighbors(const std::vector<Cubie<T>*> & neighbors);
+			void SetNeighbors(const std::vector<Cubie<T>*> &neighbors);
 			//std::shared_ptr<std::vector<std::shared_ptr<Cubie<T>>>> GetNeighbors();
-			std::vector<Cubie<T>*> & GetNeighbors();
+			const std::vector<Cubie<T>*> & GetNeighbors();
 			const T & GetValue() const;
 			void SetValue(const T &value);
 			const int GetCubieNumber() const;

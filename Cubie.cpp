@@ -22,7 +22,7 @@ namespace Boggler
 
 	template<typename T>
 	//void Cubie<T>::SetNeighbors(vector<shared_ptr<Cubie<T>>> &neighbors)
-	void Cubie<T>::SetNeighbors(const vector<Cubie<T>*> & neighbors)
+	void Cubie<T>::SetNeighbors(const vector<Cubie<T>*> &neighbors)
 	{
 		//_neighbors = make_shared<vector<shared_ptr<Cubie<T>>>>(neighbors);
 		_neighbors = neighbors;
@@ -30,7 +30,7 @@ namespace Boggler
 
 	template<typename T>
 	//shared_ptr<vector<shared_ptr<Cubie<T>>>> Cubie<T>::GetNeighbors()
-	vector<Cubie<T>*> & Cubie<T>::GetNeighbors()
+	const vector<Cubie<T>*> & Cubie<T>::GetNeighbors()
 	{
 		return _neighbors;
 	}

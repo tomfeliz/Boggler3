@@ -126,22 +126,24 @@ namespace Boggler
 
 #pragma region CountWords
 
-	template<typename T>
-	int Cube<T>::CountWords(vector<tstring> &wordList)
-	{
-		int count = 0;
-		for (auto cubie : _cubies)
-		{
-			
-		}
-		return count;
-	}
+	//template<typename T>
+	//int Cube<T>::CountWords(const vector<tstring> &wordList)
+	//{
+	//	int count = 0;
+	//	for (auto cubie : _cubies)
+	//	{
+	//		
+	//	}
+	//	return count;
+	//}
 
-	template<typename T>
-	bool Cube<T>::FindPrefix(tstring & prefix)
-	{
-		return false;
-	}
+	//template<typename T>
+	//bool Cube<T>::FindPrefix(const vector<tstring> &wordList, const tstring &prefix)
+	//{
+
+
+	//	return false;
+	//}
 
 #pragma endregion
 
