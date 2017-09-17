@@ -1,15 +1,13 @@
+#include "stdafx.h"
 #define _ITERATOR_DEBUG_LEVEL 0
 
-#include "stdafx.h"
-#include <atomic>
-#include <ctime>
 #include <fstream>
 #include <io.h>
 #include <iostream>
 #include <memory>
 #include <ppl.h>
 #include <regex>
-#include <set>
+#include <thread>
 #include <string>
 #include <vector>
 
@@ -63,45 +61,73 @@ int _tmain(int argc, _TCHAR* argv[])
 	tstring wordFileName = argv[2];
 
 	// Set global start clock
-	clock_t start0 = clock();
+	auto start0 = clock();
 
 	// Load the word file.
-	clock_t start1 = clock();
+	auto start1 = clock();
 	LoadWordList(wordFileName);
-	clock_t finish1 = clock();
+	auto finish1 = clock();
 	cout << "LoadWordList: Loaded " << WordList.size() << " words in " 
-		<< ((float)(finish1 - start1)) / CLOCKS_PER_SEC << " seconds." << endl;
+		<< static_cast<float>(finish1 - start1) / CLOCKS_PER_SEC << " seconds." << endl;
 
 	// Load the cube file.
-	clock_t start2 = clock();
+	auto start2 = clock();
 	LoadCubes(cubeFileName);
-	clock_t finish2 = clock();
+	auto finish2 = clock();
 	cout << "LoadCubes: Loaded " << CubeList.size() << " cubes in " 
-		<< ((float)(finish2 - start2)) / CLOCKS_PER_SEC << " seconds." << endl;
+		<< static_cast<float>(finish2 - start2) / CLOCKS_PER_SEC << " seconds." << endl;
 
-	for (unsigned int i = 0; i < CubeList.size(); i++)
-    {
-        clock_t start3 = clock();
-        atomic<int> wordCount = 0;
-		auto cube = CubeList[i];
+	vector<thread> workers;
+	map<int, pair<int, float>> results;
+	auto numBlocks = thread::hardware_concurrency();; // number of threads
+	cout << "Using " << numBlocks << " hardware threads." << endl;
+	auto blockSize = CubeList.size() / numBlocks;
+	mutex cons;
 
-		concurrency::parallel_for_each(begin(WordList), end(WordList), [&](tstring word) 
+	for (auto block = 0; block < numBlocks; block++)
+	{
+		auto blockStart = block * blockSize;
+		auto blockEnd = min((block + 1) * blockSize - 1, CubeList.size() - 1);
+
+		auto worker = thread([blockStart, blockEnd, &results, &cons]()
 		{
-			if (cube->FindWord(word))
-            {
-                wordCount++;
-            }
+			for (auto i = blockStart; i <= blockEnd; i++)
+			{
+				auto cube = CubeList[i];
+				auto count = 0;
+				auto start3 = clock();
+				for (auto word : WordList)
+				{
+					if (cube->FindWord(word))
+					{
+						++count;
+					}
+				}
+				auto finish3 = clock();
+				
+				results[i] = make_pair(count, static_cast<float>(finish3 - start3) * 1000 / CLOCKS_PER_SEC);
+				//cons.lock();
+				//cout << "Cube " << (i + 1) << ": " << count << " words ("
+				//	<< (static_cast<float>(finish3 - start3) * 1000) / CLOCKS_PER_SEC << " ms)" << endl;
+				//cons.unlock();
+			}
 		});
+		workers.push_back(move(worker));
+	}
 
-		clock_t finish3 = clock();
+	for (auto& th : workers)
+	{
+		th.join();
+	}
 
-        cout << "Cube " << (i + 1) << ": " << wordCount << " words (" 
-			<< ((float)(finish3 - start3) * 1000) / CLOCKS_PER_SEC << " ms)" << endl;
-    }
+	for (auto i = 0; i < results.size(); i++)
+	{
+		cout << "Cube " << (i + 1) << ": " << results[i].first << " words ("
+			<< results[i].second << " ms)" << endl;
+	}
 
-	clock_t finish0 = clock();
-
-    cout << "Total execution time: " << ((float)(finish0 - start0)) / CLOCKS_PER_SEC << " seconds" << endl;
+	auto finish0 = clock();
+    cout << "Total execution time: " << static_cast<float>(finish0 - start0) / CLOCKS_PER_SEC << " seconds" << endl;
 
 	string temp;
 	cout << "Press enter to terminate program..." << endl;
