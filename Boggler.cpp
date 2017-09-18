@@ -20,6 +20,8 @@ typedef basic_string<TCHAR> tstring;
 typedef basic_regex<TCHAR> tregex;
 typedef basic_ifstream<TCHAR> tifstream;
 
+template<typename Iterator, typename Lambda>
+void parallel_for(const Iterator& first, const Iterator& last, const Lambda& l);
 bool LoadWordList(const tstring &wordFileName);
 bool LoadCubes(const tstring &cubeFileName);
 
@@ -77,50 +79,67 @@ int _tmain(int argc, _TCHAR* argv[])
 	cout << "LoadCubes: Loaded " << CubeList.size() << " cubes in " 
 		<< static_cast<float>(finish2 - start2) / CLOCKS_PER_SEC << " seconds." << endl;
 
-	vector<thread> workers;
-	map<int, pair<int, float>> results;
-	auto numBlocks = thread::hardware_concurrency();; // number of threads
+	//vector<thread> workers;
+	int numBlocks = thread::hardware_concurrency();; // number of threads
 	cout << "Using " << numBlocks << " hardware threads." << endl;
-	auto blockSize = CubeList.size() / numBlocks;
-	mutex cons;
+	//auto blockSize = CubeList.size() / numBlocks;
+	map<int, pair<int, float>> results;
+	atomic<int> cubeNum = 0;
+	//mutex cons;
 
-	for (auto block = 0; block < numBlocks; block++)
+	parallel_for(begin(CubeList), end(CubeList), [&results, &cubeNum](shared_ptr<Cube<TCHAR>>& cube)
 	{
-		auto blockStart = block * blockSize;
-		auto blockEnd = min((block + 1) * blockSize - 1, CubeList.size() - 1);
-
-		auto worker = thread([blockStart, blockEnd, &results, &cons]()
+		auto count = 0;
+		auto start3 = clock();
+		for (auto word : WordList)
 		{
-			for (auto i = blockStart; i <= blockEnd; i++)
+			if (cube->FindWord(word))
 			{
-				auto cube = CubeList[i];
-				auto count = 0;
-				auto start3 = clock();
-				for (auto word : WordList)
-				{
-					if (cube->FindWord(word))
-					{
-						++count;
-					}
-				}
-				auto finish3 = clock();
-				
-				results[i] = make_pair(count, static_cast<float>(finish3 - start3) * 1000 / CLOCKS_PER_SEC);
-				//cons.lock();
-				//cout << "Cube " << (i + 1) << ": " << count << " words ("
-				//	<< (static_cast<float>(finish3 - start3) * 1000) / CLOCKS_PER_SEC << " ms)" << endl;
-				//cons.unlock();
+				++count;
 			}
-		});
-		workers.push_back(move(worker));
-	}
+		}
+		auto finish3 = clock();
 
-	for (auto& th : workers)
-	{
-		th.join();
-	}
+		results[cubeNum++] = make_pair(count, static_cast<float>(finish3 - start3) * 1000 / CLOCKS_PER_SEC);
+	});
 
-	for (auto i = 0; i < results.size(); i++)
+	//for (auto block = 0; block < numBlocks; block++)
+	//{
+	//	auto blockStart = block * blockSize;
+	//	auto blockEnd = min((block + 1) * blockSize - 1, CubeList.size() - 1);
+
+	//	auto worker = thread([blockStart, blockEnd, &results]()
+	//	{
+	//		for (auto i = blockStart; i <= blockEnd; i++)
+	//		{
+	//			auto cube = CubeList[i];
+	//			auto count = 0;
+	//			auto start3 = clock();
+	//			for (auto word : WordList)
+	//			{
+	//				if (cube->FindWord(word))
+	//				{
+	//					++count;
+	//				}
+	//			}
+	//			auto finish3 = clock();
+	//			
+	//			results[i] = make_pair(count, static_cast<float>(finish3 - start3) * 1000 / CLOCKS_PER_SEC);
+	//			//cons.lock();
+	//			//cout << "Cube " << (i + 1) << ": " << count << " words ("
+	//			//	<< (static_cast<float>(finish3 - start3) * 1000) / CLOCKS_PER_SEC << " ms)" << endl;
+	//			//cons.unlock();
+	//		}
+	//	});
+	//	workers.push_back(move(worker));
+	//}
+
+	//for (auto& th : workers)
+	//{
+	//	th.join();
+	//}
+
+	for (unsigned int i = 0; i < results.size(); i++)
 	{
 		cout << "Cube " << (i + 1) << ": " << results[i].first << " words ("
 			<< results[i].second << " ms)" << endl;
@@ -173,10 +192,34 @@ bool LoadCubes(const tstring &cubeFileName)
 	cubeFile.close();
 
 	// Calculate cube path cache.
-	concurrency::parallel_for_each(begin(CubeList), end(CubeList), [](shared_ptr<Cube<TCHAR>> cube)
+	parallel_for(begin(CubeList), end(CubeList), [](shared_ptr<Cube<TCHAR>> cube)
 	{
 		cube->PopulatePathCache();
 	});
 
 	return true;
+}
+
+template<typename Iterator, typename Lambda>
+void parallel_for(const Iterator& first, const Iterator& last, const Lambda& l)
+{
+	const auto nthreads = thread::hardware_concurrency();
+	const size_t portion = (last - first) / nthreads;
+	std::vector<std::thread> threads;
+	for (Iterator it = first; it < last; it += portion)
+	{
+		Iterator begin = it;
+		Iterator end = it + portion;
+		if (end > last)
+			end = last;
+
+		threads.push_back(thread([begin, end, l]()
+		{
+			for (Iterator i = begin; i != end; ++i)
+			{
+				l(*i);
+			}
+		}));
+	}
+	for_each(begin(threads), end(threads), [](thread& th) { th.join(); });
 }

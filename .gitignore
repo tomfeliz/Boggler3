@@ -156,3 +156,4 @@ Debug
 Release
 /.project
 *.db
+*.opendb
