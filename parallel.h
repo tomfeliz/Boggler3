@@ -7,16 +7,16 @@ template<typename Iterator, typename Function>
 void parallel_for_each(const Iterator& first, const Iterator& last, const Function& l)
 {
 	const auto nthreads = std::thread::hardware_concurrency();
-	const size_t portion = (last - first) / nthreads;
+	const size_t chunk = (last - first) / nthreads;
 	std::vector<std::thread> threads;
-	for (Iterator it = first; it < last; it += portion)
+	for (Iterator it = first; it < last; it += chunk)
 	{
 		Iterator begin = it;
-		Iterator end = it + portion;
+		Iterator end = it + chunk;
 		if (end > last)
 			end = last;
 
-		threads.push_back(thread([begin, end, l]()
+		threads.push_back(std::thread([begin, end, l]()
 		{
 			for (Iterator i = begin; i != end; ++i)
 			{
