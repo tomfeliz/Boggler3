@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "Cube.h"
+#include "parallel.h"
 
 using namespace std;
 using namespace Boggler;
@@ -20,8 +21,6 @@ typedef basic_string<TCHAR> tstring;
 typedef basic_regex<TCHAR> tregex;
 typedef basic_ifstream<TCHAR> tifstream;
 
-template<typename Iterator, typename Lambda>
-void parallel_for(const Iterator& first, const Iterator& last, const Lambda& l);
 bool LoadWordList(const tstring &wordFileName);
 bool LoadCubes(const tstring &cubeFileName);
 
@@ -59,35 +58,33 @@ int _tmain(int argc, _TCHAR* argv[])
 
 #pragma endregion
 
-	tstring cubeFileName = argv[1];
-	tstring wordFileName = argv[2];
+	const tstring cubeFileName = argv[1];
+	const tstring wordFileName = argv[2];
 
 	// Set global start clock
-	auto start0 = clock();
+	const auto start0 = clock();
 
 	// Load the word file.
-	auto start1 = clock();
+	const auto start1 = clock();
 	LoadWordList(wordFileName);
-	auto finish1 = clock();
+	const auto finish1 = clock();
 	cout << "LoadWordList: Loaded " << WordList.size() << " words in " 
 		<< static_cast<float>(finish1 - start1) / CLOCKS_PER_SEC << " seconds." << endl;
 
 	// Load the cube file.
-	auto start2 = clock();
+	const auto start2 = clock();
 	LoadCubes(cubeFileName);
-	auto finish2 = clock();
+	const auto finish2 = clock();
 	cout << "LoadCubes: Loaded " << CubeList.size() << " cubes in " 
 		<< static_cast<float>(finish2 - start2) / CLOCKS_PER_SEC << " seconds." << endl;
 
-	//vector<thread> workers;
-	int numBlocks = thread::hardware_concurrency();; // number of threads
+	const int numBlocks = thread::hardware_concurrency();; // number of threads
 	cout << "Using " << numBlocks << " hardware threads." << endl;
-	//auto blockSize = CubeList.size() / numBlocks;
 	map<int, pair<int, float>> results;
 	atomic<int> cubeNum = 0;
 	//mutex cons;
 
-	parallel_for(begin(CubeList), end(CubeList), [&results, &cubeNum](shared_ptr<Cube<TCHAR>>& cube)
+	parallel_for_each(begin(CubeList), end(CubeList), [&results, &cubeNum](shared_ptr<Cube<TCHAR>>& cube)
 	{
 		auto count = 0;
 		auto start3 = clock();
@@ -102,42 +99,6 @@ int _tmain(int argc, _TCHAR* argv[])
 
 		results[cubeNum++] = make_pair(count, static_cast<float>(finish3 - start3) * 1000 / CLOCKS_PER_SEC);
 	});
-
-	//for (auto block = 0; block < numBlocks; block++)
-	//{
-	//	auto blockStart = block * blockSize;
-	//	auto blockEnd = min((block + 1) * blockSize - 1, CubeList.size() - 1);
-
-	//	auto worker = thread([blockStart, blockEnd, &results]()
-	//	{
-	//		for (auto i = blockStart; i <= blockEnd; i++)
-	//		{
-	//			auto cube = CubeList[i];
-	//			auto count = 0;
-	//			auto start3 = clock();
-	//			for (auto word : WordList)
-	//			{
-	//				if (cube->FindWord(word))
-	//				{
-	//					++count;
-	//				}
-	//			}
-	//			auto finish3 = clock();
-	//			
-	//			results[i] = make_pair(count, static_cast<float>(finish3 - start3) * 1000 / CLOCKS_PER_SEC);
-	//			//cons.lock();
-	//			//cout << "Cube " << (i + 1) << ": " << count << " words ("
-	//			//	<< (static_cast<float>(finish3 - start3) * 1000) / CLOCKS_PER_SEC << " ms)" << endl;
-	//			//cons.unlock();
-	//		}
-	//	});
-	//	workers.push_back(move(worker));
-	//}
-
-	//for (auto& th : workers)
-	//{
-	//	th.join();
-	//}
 
 	for (unsigned int i = 0; i < results.size(); i++)
 	{
@@ -192,34 +153,10 @@ bool LoadCubes(const tstring &cubeFileName)
 	cubeFile.close();
 
 	// Calculate cube path cache.
-	parallel_for(begin(CubeList), end(CubeList), [](shared_ptr<Cube<TCHAR>> cube)
+	parallel_for_each(begin(CubeList), end(CubeList), [](shared_ptr<Cube<TCHAR>> cube)
 	{
 		cube->PopulatePathCache();
 	});
 
 	return true;
-}
-
-template<typename Iterator, typename Lambda>
-void parallel_for(const Iterator& first, const Iterator& last, const Lambda& l)
-{
-	const auto nthreads = thread::hardware_concurrency();
-	const size_t portion = (last - first) / nthreads;
-	std::vector<std::thread> threads;
-	for (Iterator it = first; it < last; it += portion)
-	{
-		Iterator begin = it;
-		Iterator end = it + portion;
-		if (end > last)
-			end = last;
-
-		threads.push_back(thread([begin, end, l]()
-		{
-			for (Iterator i = begin; i != end; ++i)
-			{
-				l(*i);
-			}
-		}));
-	}
-	for_each(begin(threads), end(threads), [](thread& th) { th.join(); });
 }

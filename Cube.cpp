@@ -27,7 +27,7 @@ namespace Boggler
     bool Cube<T>::FindWord(const tstring &word)
     {
         bool found = false;
-		int wordLen = word.size();
+		auto wordLen = word.size();
 
         if (wordLen <= PrefixLength)
         {
@@ -59,11 +59,9 @@ namespace Boggler
 
     // Main recursive depth-first search routine.
 	template<typename T>
-	//bool Cube<T>::FindWordRecursive(const vector<shared_ptr<Cubie<T>>> &fromPath, tstring subWord, deque<shared_ptr<Cubie<T>>> &pathStack)
-	//bool Cube<T>::FindWordRecursive(const std::vector<Cubie<T>*> &fromPath, tstring subWord, std::deque<Cubie<T>*> &pathStack)
-	bool Cube<T>::FindWordRecursive(const std::vector<Cubie<T>*> &fromPath, tstring subWord, vector<bool> &cubieMap)
+	bool Cube<T>::FindWordRecursive(const std::vector<Cubie<T>*>& fromPath, tstring subWord, vector<bool>& cubieMap)
     {
-		int subWordLen = subWord.size();
+		int subWordLen = static_cast<int>(subWord.size());
         bool found = false;
 
         for (const auto cubie : fromPath)
